@@ -10,6 +10,16 @@ spec:
       - name: node-db
         emptyDir:
           sizeLimit: 20Gi  # Testnet requires less storage
+---
+# Mithril snapshot cache PVC for testnet
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mithril-snapshot-cache
+spec:
+  resources:
+    requests:
+      storage: 50Gi  # Testnet requires less storage for snapshot cache
 
 ---
 apiVersion: apps/v1

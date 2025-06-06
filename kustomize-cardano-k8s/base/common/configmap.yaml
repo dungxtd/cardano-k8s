@@ -19,3 +19,9 @@ data:
 
   # Network configuration (will be overridden in overlays)
   NETWORK: ""
+
+  # Mithril configuration for fast bootstrapping (mainnet by default)
+  MITHRIL_AGGREGATOR_ENDPOINT: ""
+  MITHRIL_GENESIS_VERIFICATION_KEY: ""
+  MITHRIL_SNAPSHOT_DIGEST: "latest"
+  ENABLE_MITHRIL_BOOTSTRAP: "true"

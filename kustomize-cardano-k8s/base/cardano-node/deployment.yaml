@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: cardano-node
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: cardano-node
@@ -12,6 +12,52 @@ spec:
       labels:
         app: cardano-node
     spec:
+      initContainers:
+      # Mithril bootstrap container for fast initial sync
+      - name: mithril-bootstrap
+        image: ghcr.io/input-output-hk/mithril-client:latest
+        env:
+        - name: NETWORK
+          valueFrom:
+            configMapKeyRef:
+              name: common-env
+              key: NETWORK
+        - name: MITHRIL_AGGREGATOR_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: common-env
+              key: MITHRIL_AGGREGATOR_ENDPOINT
+        - name: MITHRIL_GENESIS_VERIFICATION_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: common-env
+              key: MITHRIL_GENESIS_VERIFICATION_KEY
+        - name: MITHRIL_SNAPSHOT_DIGEST
+          valueFrom:
+            configMapKeyRef:
+              name: common-env
+              key: MITHRIL_SNAPSHOT_DIGEST
+        - name: ENABLE_MITHRIL_BOOTSTRAP
+          valueFrom:
+            configMapKeyRef:
+              name: common-env
+              key: ENABLE_MITHRIL_BOOTSTRAP
+        command: ["/bin/bash"]
+        args: ["/scripts/mithril-bootstrap.sh"]
+        volumeMounts:
+        - name: node-db
+          mountPath: /data/db
+        - name: mithril-scripts
+          mountPath: /scripts
+        - name: mithril-snapshot-cache
+          mountPath: /shared
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
       containers:
       - name: cardano-node
         image: ghcr.io/intersectmbo/cardano-node:10.1.4
@@ -41,6 +87,8 @@ spec:
           mountPath: /data/db
         - name: node-ipc
           mountPath: /ipc
+        - name: mithril-snapshot-cache
+          mountPath: /shared
         resources:
           requests:
             memory: "4Gi"
@@ -89,8 +137,16 @@ spec:
       volumes:
       - name: node-ipc
         emptyDir: {}
-      # Use emptyDir for stateless operation to enable horizontal scaling
-      # In production, consider using shared storage (ReadWriteMany) if blockchain data persistence is needed
+      # Use emptyDir for node database (each pod gets fresh copy from shared cache)
       - name: node-db
         emptyDir:
           sizeLimit: 50Gi
+      # Mithril bootstrap scripts
+      - name: mithril-scripts
+        configMap:
+          name: mithril-config
+          defaultMode: 0755
+      # Shared volume for Mithril snapshot caching
+      - name: mithril-snapshot-cache
+        persistentVolumeClaim:
+          claimName: mithril-snapshot-cache
