@@ -21,4 +21,4 @@ configMapGenerator:
   literals:
   - NETWORK=preprod
 
-namespace: cardano-testnet
+namespace: cardano

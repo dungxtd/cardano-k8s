@@ -20,27 +20,4 @@ spec:
   selector:
     app: cardano-node
 
----
-# Headless service for StatefulSet
-apiVersion: v1
-kind: Service
-metadata:
-  name: cardano-node-headless
-spec:
-  type: ClusterIP
-  clusterIP: None
-  ports:
-  - port: 3001
-    targetPort: 3001
-    protocol: TCP
-    name: cardano-node
-  - port: 12788
-    targetPort: 12788
-    protocol: TCP
-    name: ekg-metrics
-  - port: 30000
-    targetPort: 30000
-    protocol: TCP
-    name: socket-tcp
-  selector:
-    app: cardano-node
+

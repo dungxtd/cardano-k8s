@@ -13,7 +13,7 @@ data:
   CARDANO_NODE_SOCKET_PATH: "/ipc/node.socket"
 
   # Socat TCP transport settings
-  CARDANO_NODE_SOCKET_TCP_HOST: "cardano-node-headless"
+  CARDANO_NODE_SOCKET_TCP_HOST: "cardano-node"
   CARDANO_NODE_SOCKET_TCP_PORT: "30000"
   SOCAT_TIMEOUT: "3600"
 
