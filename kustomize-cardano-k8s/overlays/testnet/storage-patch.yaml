@@ -1,0 +1,44 @@
+# Storage patches for testnet - smaller storage requirements
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cardano-node
+spec:
+  volumeClaimTemplates:
+  - metadata:
+      name: node-db
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 16Gi  # Testnet requires less storage
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cardano-db-sync
+spec:
+  volumeClaimTemplates:
+  - metadata:
+      name: db-sync-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 8Gi  # Testnet requires less storage
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+spec:
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 30Gi  # Testnet database is smaller

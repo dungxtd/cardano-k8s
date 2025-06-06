@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: common-env
+data:
+  # PostgreSQL connection settings
+  POSTGRES_HOST: "postgres"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "cexplorer"
+  POSTGRES_USER: "postgres"
+  
+  # Cardano Node settings
+  CARDANO_NODE_SOCKET_PATH: "/ipc/node.socket"
+
+  # Socat TCP transport settings
+  CARDANO_NODE_SOCKET_TCP_HOST: "cardano-node-headless"
+  CARDANO_NODE_SOCKET_TCP_PORT: "30000"
+  SOCAT_TIMEOUT: "3600"
+
+  # Network configuration (will be overridden in overlays)
+  NETWORK: ""

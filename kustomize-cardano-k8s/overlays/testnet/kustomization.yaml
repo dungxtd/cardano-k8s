@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: cardano-testnet
+
+resources:
+- namespace.yaml
+- ../../base/common
+- ../../base/postgres
+- ../../base/cardano-node
+- ../../base/cardano-db-sync
+
+patches:
+- path: network-config-patch.yaml
+- path: storage-patch.yaml
+
+configMapGenerator:
+- name: common-env
+  behavior: merge
+  literals:
+  - NETWORK=preprod
+
+namespace: cardano-testnet

@@ -1,0 +1,13 @@
+# Patch to configure Cardano Node for testnet
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cardano-node-config
+data: {}
+---
+# Patch to configure DB Sync for testnet
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cardano-db-sync-config
+data: {}

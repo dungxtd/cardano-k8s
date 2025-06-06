@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cardano-node
+spec:
+  serviceName: cardano-node
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cardano-node
+  template:
+    metadata:
+      labels:
+        app: cardano-node
+    spec:
+      initContainers:
+      # Clean up any lost+found directories that might interfere
+      - name: cleanup-volumes
+        image: busybox:1.36
+        command: ["sh", "-c", "rm -rf /data/db/lost+found /ipc/lost+found || true"]
+        volumeMounts:
+        - name: node-db
+          mountPath: /data/db
+        - name: node-ipc
+          mountPath: /ipc
+      containers:
+      - name: cardano-node
+        image: ghcr.io/intersectmbo/cardano-node:10.1.4
+        env:
+        - name: NETWORK
+          valueFrom:
+            configMapKeyRef:
+              name: common-env
+              key: NETWORK
+        - name: CARDANO_NODE_SOCKET_PATH
+          valueFrom:
+            configMapKeyRef:
+              name: common-env
+              key: CARDANO_NODE_SOCKET_PATH
+        ports:
+        - containerPort: 3001
+          name: cardano-node
+          protocol: TCP
+        - containerPort: 12788
+          name: ekg-metrics
+          protocol: TCP
+        - containerPort: 30000
+          name: socket-tcp
+          protocol: TCP
+        volumeMounts:
+        - name: node-db
+          mountPath: /data/db
+        - name: node-ipc
+          mountPath: /ipc
+        resources:
+          requests:
+            memory: "4Gi"
+            cpu: "1"
+          limits:
+            memory: "8Gi"
+            cpu: "4"
+      # Socat TCP server container to expose Unix socket over TCP
+      - name: socat-tcp-server
+        image: alpine/socat
+        env:
+        - name: PORT
+          value: "30000"
+        command: ["sh", "-c", "socat TCP-LISTEN:${PORT},fork UNIX-CLIENT:/ipc/node.socket,ignoreeof"]
+        ports:
+        - containerPort: 30000
+          name: socket-tcp
+          protocol: TCP
+        volumeMounts:
+        - name: node-ipc
+          mountPath: /ipc
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+      volumes:
+      - name: node-ipc
+        emptyDir: {}
+  volumeClaimTemplates:
+  - metadata:
+      name: node-db
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 8Gi
