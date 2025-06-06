@@ -40,7 +40,7 @@ data:
 
     # Download snapshot to shared volume
     echo "Downloading Cardano DB snapshot to shared volume..."
-    /app/bin/mithril-client cardano-db download $SNAPSHOT_DIGEST --download-dir /shared/mithril-snapshot
+    /app/bin/mithril-client cardano-db download $SNAPSHOT_DIGEST --download-dir /shared/mithril-snapshot --json
 
     # Verify download success
     if [ -d "/shared/mithril-snapshot/immutable" ]; then
