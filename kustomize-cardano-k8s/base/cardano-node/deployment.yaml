@@ -27,11 +27,6 @@ spec:
             configMapKeyRef:
               name: common-env
               key: MITHRIL_AGGREGATOR_ENDPOINT
-        - name: MITHRIL_GENESIS_VERIFICATION_KEY
-          valueFrom:
-            configMapKeyRef:
-              name: common-env
-              key: MITHRIL_GENESIS_VERIFICATION_KEY
         - name: MITHRIL_SNAPSHOT_DIGEST
           valueFrom:
             configMapKeyRef:

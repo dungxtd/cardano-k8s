@@ -17,16 +17,17 @@ data:
 
     # Set environment variables for mithril-client
     export AGGREGATOR_ENDPOINT="${MITHRIL_AGGREGATOR_ENDPOINT}"
-    export GENESIS_VERIFICATION_KEY="${MITHRIL_GENESIS_VERIFICATION_KEY}"
+    export GENESIS_VERIFICATION_KEY=$(wget -q -O - https://raw.githubusercontent.com/input-output-hk/mithril/main/mithril-infra/configuration/release-${NETWORK}/genesis.vkey)
     export SNAPSHOT_DIGEST="${MITHRIL_SNAPSHOT_DIGEST}"
+    
 
     # Check if snapshot already exists in shared volume
-    if [ -d "/shared/mithril-snapshot/immutable" ] && [ "$(ls -A /shared/mithril-snapshot/immutable 2>/dev/null)" ]; then
+    if [ -d "/shared/mithril-snapshot/db/immutable" ] && [ "$(ls -A /shared/mithril-snapshot/db/immutable 2>/dev/null)" ]; then
       echo "Existing Mithril snapshot found in shared volume, using cached data..."
 
       # Copy from shared volume to node database directory
       echo "Copying cached snapshot to node database..."
-      cp -r /shared/mithril-snapshot/* /data/db/
+      cp -r /shared/mithril-snapshot/db/* /data/db/
 
       echo "Cached snapshot restored successfully!"
       echo "Database size: $(du -sh /data/db | cut -f1)"
@@ -43,12 +44,12 @@ data:
     /app/bin/mithril-client cardano-db download $SNAPSHOT_DIGEST --download-dir /shared/mithril-snapshot --json
 
     # Verify download success
-    if [ -d "/shared/mithril-snapshot/immutable" ]; then
+    if [ -d "/shared/mithril-snapshot/db/immutable" ]; then
       echo "Mithril snapshot downloaded successfully to shared volume!"
 
       # Copy to node database directory
       echo "Copying snapshot to node database..."
-      cp -r /shared/mithril-snapshot/* /data/db/
+      cp -r /shared/mithril-snapshot/db/* /data/db/
 
       echo "Mithril bootstrap completed successfully!"
       echo "Snapshot cached in: /shared/mithril-snapshot"
