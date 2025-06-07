@@ -47,3 +47,20 @@ I think Cardano Node can scale by using solutions like Hydra - a fast and lightw
 
 When a Cardano Node pod starts, an init container downloads a snapshot from Mithril and saves it to a shared volume.  
 New pods reuse that snapshot to skip syncing from genesis and start up faster.
+
+### System in Action
+
+![](<image/CleanShot 2025-06-07 at 13.21.42@2x.png>)
+*Pods starting up successfully with Mithril snapshot initialization*
+
+![](<image/CleanShot 2025-06-07 at 14.14.48@2x.png>)
+*Fast node sync in progress using Mithril snapshot*
+
+![](<image/CleanShot 2025-06-07 at 15.28.16@2x.png>)
+*DB Sync successfully connected to node and syncing data*
+
+![](<image/CleanShot 2025-06-07 at 22.40.59@2x.png>)
+*All system components running healthy in Kubernetes*
+
+![](<image/TablePlus 2025-06-07 22.41.22.png>)
+*Blockchain data successfully synced to PostgreSQL*
