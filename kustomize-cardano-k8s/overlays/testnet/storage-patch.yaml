@@ -8,6 +8,7 @@ spec:
   - metadata:
       name: node-db
     spec:
+      storageClassName: "local-path"
       accessModes: ["ReadWriteOnce"]
       resources:
         requests:
@@ -19,6 +20,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: mithril-snapshot-cache
 spec:
+  accessModes:
+  - ReadWriteMany
+  storageClassName: "longhorn"
   resources:
     requests:
       storage: 50Gi  # Testnet requires less storage for snapshot cache
@@ -33,6 +37,7 @@ spec:
   - metadata:
       name: db-sync-data
     spec:
+      storageClassName: "local-path"
       accessModes: ["ReadWriteOnce"]
       resources:
         requests:
@@ -48,6 +53,7 @@ spec:
   - metadata:
       name: postgres-data
     spec:
+      storageClassName: "local-path"
       accessModes: ["ReadWriteOnce"]
       resources:
         requests:

@@ -55,15 +55,6 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "100m"
-      # Clean up any lost+found directories
-      - name: cleanup-volumes
-        image: busybox:1.36
-        command: ["sh", "-c", "rm -rf /var/lib/cexplorer/lost+found /node-ipc/lost+found || true"]
-        volumeMounts:
-        - name: db-sync-data
-          mountPath: /var/lib/cexplorer
-        - name: node-ipc
-          mountPath: /node-ipc
       containers:
       - name: cardano-db-sync
         image: ghcr.io/intersectmbo/cardano-db-sync:13.6.0.5
