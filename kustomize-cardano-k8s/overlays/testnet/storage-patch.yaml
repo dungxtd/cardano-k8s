@@ -1,15 +1,17 @@
 # Storage patches for testnet - smaller storage requirements
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: cardano-node
 spec:
-  template:
+  volumeClaimTemplates:
+  - metadata:
+      name: node-db
     spec:
-      volumes:
-      - name: node-db
-        emptyDir:
-          sizeLimit: 20Gi  # Testnet requires less storage
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 20Gi  # Testnet requires less storage
 ---
 # Mithril snapshot cache PVC for testnet
 apiVersion: v1

@@ -1,0 +1,45 @@
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: cardano-db-sync-vpa
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: cardano-db-sync
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+    - containerName: cardano-db-sync
+      minAllowed:
+        memory: "2Gi"
+        cpu: "500m"
+      maxAllowed:
+        memory: "16Gi"
+        cpu: "8000m"
+      controlledResources: ["cpu", "memory"]
+    - containerName: wait-for-dependencies
+      minAllowed:
+        memory: "32Mi"
+        cpu: "25m"
+      maxAllowed:
+        memory: "256Mi"
+        cpu: "200m"
+      controlledResources: ["cpu", "memory"]
+    - containerName: cleanup-volumes
+      minAllowed:
+        memory: "16Mi"
+        cpu: "25m"
+      maxAllowed:
+        memory: "128Mi"
+        cpu: "100m"
+      controlledResources: ["cpu", "memory"]
+    - containerName: socat-socket-client
+      minAllowed:
+        memory: "32Mi"
+        cpu: "50m"
+      maxAllowed:
+        memory: "256Mi"
+        cpu: "500m"
+      controlledResources: ["cpu", "memory"]

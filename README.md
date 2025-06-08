@@ -4,7 +4,7 @@
 
 For testnet:
 ```bash
-kubectl apply -k kustomize-cardano-k8s/overlays/simple-testnet/
+kubectl apply -k kustomize-cardano-k8s/overlays/testnet/
 ```
 
 ## What's Included
@@ -29,16 +29,16 @@ To solve this, I added a `socat` sidecar to the node pod, which exposes the sock
 
 ### Autoscaling strategy
 
-Only the Cardano Node is autoscaled:
+Both Cardano Node and DB Sync use VPA (Vertical Pod Autoscaler):
 
-- It's deployed as a Deployment instead of StatefulSet, to support HPA
-- I use it as stateless resource
-- Each pod starts quickly using a Mithril snapshot
-- Storage uses `emptyDir` or a shared volume for caching snapshots
+- Cardano Node is deployed as a StatefulSet with persistent storage and VPA for automatic resource scaling
+- Each pod uses persistent volumes for the node database with Mithril snapshot for fast initial sync
+- VPA automatically adjusts CPU and memory requests/limits based on actual usage
 
-Cardano DB Sync and Postgres are not autoscaled:
+Cardano DB Sync also uses VPA:
 
 - DB Sync writes to the database and must run as a single instance
+- VPA monitors resource usage and automatically adjusts container resources
 - Postgres just have only one writer, can scale read-only externally but i dont think what you want that :>
 
 I think Cardano Node can scale by using solutions like Hydra - a fast and lightweight layer to connect with applications that support payments and similar use cases. That's all i researched when building this with no blockchain experience at the start .

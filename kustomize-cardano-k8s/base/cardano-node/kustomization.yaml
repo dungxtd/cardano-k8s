@@ -5,6 +5,6 @@ resources:
 - configmap.yaml
 - mithril-configmap.yaml
 - mithril-pvc.yaml
-- deployment.yaml
+- statefulset.yaml
 - service.yaml
-- hpa.yaml
+- vpa.yaml

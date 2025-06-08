@@ -1,0 +1,37 @@
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: cardano-node-vpa
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: cardano-node
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+    - containerName: cardano-node
+      minAllowed:
+        memory: "4Gi"
+        cpu: "1000m"
+      maxAllowed:
+        memory: "16Gi"
+        cpu: "8000m"
+      controlledResources: ["cpu", "memory"]
+    - containerName: mithril-bootstrap
+      minAllowed:
+        memory: "256Mi"
+        cpu: "250m"
+      maxAllowed:
+        memory: "2Gi"
+        cpu: "2000m"
+      controlledResources: ["cpu", "memory"]
+    - containerName: socat-tcp-server
+      minAllowed:
+        memory: "32Mi"
+        cpu: "50m"
+      maxAllowed:
+        memory: "256Mi"
+        cpu: "500m"
+      controlledResources: ["cpu", "memory"]

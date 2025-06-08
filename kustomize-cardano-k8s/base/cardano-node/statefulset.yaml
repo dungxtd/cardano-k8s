@@ -1,8 +1,9 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: cardano-node
 spec:
+  serviceName: cardano-node
   replicas: 1
   selector:
     matchLabels:
@@ -132,10 +133,6 @@ spec:
       volumes:
       - name: node-ipc
         emptyDir: {}
-      # Use emptyDir for node database (each pod gets fresh copy from shared cache)
-      - name: node-db
-        emptyDir:
-          sizeLimit: 50Gi
       # Mithril bootstrap scripts
       - name: mithril-scripts
         configMap:
@@ -145,3 +142,11 @@ spec:
       - name: mithril-snapshot-cache
         persistentVolumeClaim:
           claimName: mithril-snapshot-cache
+  volumeClaimTemplates:
+  - metadata:
+      name: node-db
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 50Gi
