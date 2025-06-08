@@ -15,15 +15,26 @@ data:
       exit 0
     fi
 
+    # Skip if data already exists in /data/db
+    if [ -d "/data/db" ] && [ "$(ls -A /data/db 2>/dev/null | grep -E '(immutable|volatile|ledger)' | head -1)" ]; then
+      echo "Existing Cardano node data found in /data/db, skipping Mithril bootstrap..."
+      echo "Database size: $(du -sh /data/db | cut -f1)"
+      echo "Contents: $(ls -la /data/db/)"
+      exit 0
+    fi
+
     # Set environment variables for mithril-client
     export AGGREGATOR_ENDPOINT="${MITHRIL_AGGREGATOR_ENDPOINT}"
     export GENESIS_VERIFICATION_KEY=$(wget -q -O - https://raw.githubusercontent.com/input-output-hk/mithril/main/mithril-infra/configuration/release-${NETWORK}/genesis.vkey)
     export SNAPSHOT_DIGEST="${MITHRIL_SNAPSHOT_DIGEST}"
     
 
+    echo "No existing data in /data/db, checking for cached Mithril snapshot..."
+
     # Check if snapshot already exists in shared volume
-    if [ -d "/shared/mithril-snapshot/db/immutable" ] && [ "$(ls -A /shared/mithril-snapshot/db/immutable 2>/dev/null)" ]; then
+    if [ -d "/shared/mithril-snapshot/db" ] && [ "$(ls -A /shared/mithril-snapshot/db 2>/dev/null | grep -E '(immutable|volatile|ledger)' | head -1)" ]; then
       echo "Existing Mithril snapshot found in shared volume, using cached data..."
+      echo "Cached snapshot size: $(du -sh /shared/mithril-snapshot/db | cut -f1)"
 
       # Copy from shared volume to node database directory
       echo "Copying cached snapshot to node database..."

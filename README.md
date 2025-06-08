@@ -74,8 +74,10 @@ I think Cardano Node can scale by using solutions like Hydra - a fast and lightw
 
 ### Mithril snapshot
 
-When a Cardano Node pod starts, an init container downloads a snapshot from Mithril and saves it to a shared volume.  
+When a Cardano Node pod starts, an init container downloads a snapshot from Mithril and saves it to a shared volume.
 New pods reuse that snapshot to skip syncing from genesis and start up faster.
+
+The bootstrap process intelligently skips if Cardano data already exists, making restarts much faster.
 
 ### System in Action
 
