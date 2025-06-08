@@ -1,0 +1,6 @@
+# Patch to configure Cardano Combined for testnet
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cardano-combined-config
+data: {}

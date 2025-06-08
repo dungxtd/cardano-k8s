@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mithril-config
+data:
+  mithril-bootstrap.sh: |
+    #!/bin/bash
+    set -euo pipefail
+
+    echo "Starting Mithril bootstrap with shared volume caching..."
+
+    # Skip if bootstrap disabled
+    if [ "${ENABLE_MITHRIL_BOOTSTRAP:-false}" != "true" ]; then
+      echo "Mithril bootstrap disabled, skipping..."
+      exit 0
+    fi
+
+    # Set environment variables for mithril-client
+    export AGGREGATOR_ENDPOINT="${MITHRIL_AGGREGATOR_ENDPOINT}"
+    export GENESIS_VERIFICATION_KEY=$(wget -q -O - https://raw.githubusercontent.com/input-output-hk/mithril/main/mithril-infra/configuration/release-${NETWORK}/genesis.vkey)
+    export SNAPSHOT_DIGEST="${MITHRIL_SNAPSHOT_DIGEST}"
+    
+
+    # Check if snapshot already exists in shared volume
+    if [ -d "/shared/mithril-snapshot/db/immutable" ] && [ "$(ls -A /shared/mithril-snapshot/db/immutable 2>/dev/null)" ]; then
+      echo "Existing Mithril snapshot found in shared volume, using cached data..."
+
+      # Copy from shared volume to node database directory
+      echo "Copying cached snapshot to node database..."
+      cp -r /shared/mithril-snapshot/db/* /data/db/
+
+      echo "Cached snapshot restored successfully!"
+      echo "Database size: $(du -sh /data/db | cut -f1)"
+      exit 0
+    fi
+
+    echo "No cached snapshot found, downloading Mithril snapshot..."
+
+    # Create shared snapshot directory
+    mkdir -p /shared/mithril-snapshot
+
+    # Download snapshot to shared volume
+    echo "Downloading Cardano DB snapshot to shared volume..."
+    /app/bin/mithril-client cardano-db download $SNAPSHOT_DIGEST --download-dir /shared/mithril-snapshot --json
+
+    # Verify download success
+    if [ -d "/shared/mithril-snapshot/db/immutable" ]; then
+      echo "Mithril snapshot downloaded successfully to shared volume!"
+
+      # Copy to node database directory
+      echo "Copying snapshot to node database..."
+      cp -r /shared/mithril-snapshot/db/* /data/db/
+
+      echo "Mithril bootstrap completed successfully!"
+      echo "Snapshot cached in: /shared/mithril-snapshot"
+      echo "Database size: $(du -sh /data/db | cut -f1)"
+    else
+      echo "ERROR: Mithril bootstrap failed"
+      exit 1
+    fi

@@ -1,16 +1,24 @@
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
-  name: cardano-db-sync-vpa
+  name: cardano-combined-vpa
 spec:
   targetRef:
     apiVersion: apps/v1
     kind: StatefulSet
-    name: cardano-db-sync
+    name: cardano-combined
   updatePolicy:
     updateMode: "Auto"
   resourcePolicy:
     containerPolicies:
+    - containerName: cardano-node
+      minAllowed:
+        memory: "4Gi"
+        cpu: "1000m"
+      maxAllowed:
+        memory: "16Gi"
+        cpu: "8000m"
+      controlledResources: ["cpu", "memory"]
     - containerName: cardano-db-sync
       minAllowed:
         memory: "2Gi"
@@ -19,29 +27,21 @@ spec:
         memory: "16Gi"
         cpu: "8000m"
       controlledResources: ["cpu", "memory"]
-    - containerName: wait-for-dependencies
+    - containerName: mithril-bootstrap
+      minAllowed:
+        memory: "256Mi"
+        cpu: "250m"
+      maxAllowed:
+        memory: "2Gi"
+        cpu: "2000m"
+      controlledResources: ["cpu", "memory"]
+    - containerName: wait-for-postgres
       minAllowed:
         memory: "32Mi"
         cpu: "25m"
       maxAllowed:
         memory: "256Mi"
         cpu: "200m"
-      controlledResources: ["cpu", "memory"]
-    - containerName: cleanup-volumes
-      minAllowed:
-        memory: "16Mi"
-        cpu: "25m"
-      maxAllowed:
-        memory: "128Mi"
-        cpu: "100m"
-      controlledResources: ["cpu", "memory"]
-    - containerName: socat-socket-client
-      minAllowed:
-        memory: "32Mi"
-        cpu: "50m"
-      maxAllowed:
-        memory: "256Mi"
-        cpu: "500m"
       controlledResources: ["cpu", "memory"]
     - containerName: cleanup-volumes
       minAllowed:

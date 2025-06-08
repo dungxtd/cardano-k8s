@@ -1,0 +1,52 @@
+# Storage patches for testnet combined - smaller storage requirements
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cardano-combined
+spec:
+  volumeClaimTemplates:
+  - metadata:
+      name: node-db
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: "local-path"
+      resources:
+        requests:
+          storage: 20Gi  # Testnet requires less storage
+  - metadata:
+      name: db-sync-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: "local-path"
+      resources:
+        requests:
+          storage: 8Gi  # Testnet requires less storage
+---
+# Mithril snapshot cache PVC for testnet
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mithril-snapshot-cache
+spec:
+  accessModes:
+  - ReadWriteMany
+  storageClassName: "longhorn"
+  resources:
+    requests:
+      storage: 50Gi  # Testnet requires less storage for snapshot cache
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+spec:
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-data
+    spec:
+      storageClassName: "local-path" 
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 30Gi  # Testnet database is smaller

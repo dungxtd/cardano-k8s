@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cardano-combined-config
+data:
+  wait-for-postgres.sh: |
+    #!/bin/bash
+    set -euo pipefail
+
+    echo "Installing required tools..."
+    apk add --no-cache netcat-openbsd
+
+    echo "Waiting for PostgreSQL to be ready..."
+
+    # Wait for PostgreSQL
+    echo "Checking PostgreSQL..."
+    until pg_isready -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} >/dev/null 2>&1; do
+      echo "PostgreSQL not ready, waiting 5 seconds..."
+      sleep 5
+    done
+    echo "PostgreSQL is ready!"
+
+    echo "PostgreSQL dependency satisfied - containers can start!"
